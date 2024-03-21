@@ -1,98 +1,53 @@
-const express = require('express');
-const mysql = require('mysql');
-const bodyParser = require('body-parser');
-const session = require('express-session');
+// Import express.js
+const express = require("express");
 
-const app = express();
-app.use(express.static('public'));
+// Create express app
+var app = express();
 
+// Add static files location
+app.use(express.static("static"));
+
+// Use the Pug templating engine
 app.set('view engine', 'pug');
+app.set('views', './app/views');
 
-app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(session({
-    secret: 'your-secret-key',
-    resave: false,
-    saveUninitialized: false
-}));
+// Get the functions in the db.js file to use
+const db = require('./services/db');
 
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '200605',
-    database: 'UNIVERSITY'
+// Create a route for root - /
+app.get("/", function(req, res) {
+    res.render("index");
 });
 
-db.connect((err) => {
-    if (err) {
-        throw err;
-    }
-    console.log('Connected to MySQL database');
-});
-
-function authenticate(req, res, next) {
-    const { email, password } = req.body;
-    const query = `SELECT * FROM Student WHERE email = ? AND password = ?`;
-    db.query(query, [email, password], (err, results) => {
-        if (err) {
-            throw err;
-        }
-        if (results.length > 0) {
-            req.session.user = results[0];
-            next();
-        } else {
-            res.redirect('/login?message=Invalid email or password');
-        }
-    });
-}
-
-app.get('/login', (req, res) => {
-    res.render('login');
-});
-
-app.post('/login', authenticate, (req, res) => {
-    res.redirect('/record');
-});
-
-app.get('/record', (req, res) => {
-    const student = req.session.user;
-    if (student) {
-        const studentId = student.id;
-        const queryCourses = `SELECT Course.name FROM Course INNER JOIN Result ON Course.id = Result.course_id WHERE Result.student_id = ?`;
-        db.query(queryCourses, [studentId], (err, courseResults) => {
-            if (err) {
-                throw err;
-            }
-            const courses = courseResults.map(course => ({ name: course.name }));
-            res.render('record', { student, courses });
-        });
-    } else {
-        res.redirect('/login?message=Invalid email or password');
-    }
-});
-
-
-app.post('/result', (req, res) => {
-    res.redirect('/result');
-});
-
-// Route for rendering result page
-app.get('/result', (req, res) => {
-    const studentId = req.session.user.id; // Get the student's ID from the session
-    const queryResult = `SELECT Course.name AS course, Result.grade 
-                         FROM Result 
-                         INNER JOIN Course ON Result.course_id = Course.id 
-                         WHERE Result.student_id = ?`; // Filter by student ID
-    db.query(queryResult, [studentId], (err, results) => {
-        if (err) {
-            throw err;
-        }
-        res.render('result', { results });
+// Create a route for testing the db
+app.get("/db_test", function(req, res) {
+    // Assumes a table called test_table exists in your database
+    sql = 'select * from Course';
+    db.query(sql).then(results => {
+        console.log(results);
+        res.send(results)
     });
 });
 
+// Create a route for /goodbye
+// Responds to a 'GET' request
+app.get("/goodbye", function(req, res) {
+    res.send("Goodbye world!");
+});
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Create a dynamic route for /hello/<name>, where name is any value provided by user
+// At the end of the URL
+// Responds to a 'GET' request
+app.get("/hello/:name", function(req, res) {
+    // req.params contains any parameters in the request
+    // We can examine it in the console for debugging purposes
+    console.log(req.params);
+    //  Retrieve the 'name' parameter and use it in a dynamically generated page
+    res.send("Hello " + req.params.name);
+});
+
+// Start server on port 3000
+app.listen(3000,function(){
+    console.log(`Server running at http://127.0.0.1:3000/`);
 });

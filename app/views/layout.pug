@@ -1,5 +1,12 @@
-html 
-    head    
-        title Title here 
-    body
-       block content 
+doctype html
+html
+  head
+    title Student Profile
+  body
+    h1 Student Profile
+    div
+      p Name: #{student.name}
+      p Email: #{student.email}
+      p Enrollment Year: #{student.enrollmentYear}
+      // Add more profile details as needed
+    a(href='/logout') Logout
