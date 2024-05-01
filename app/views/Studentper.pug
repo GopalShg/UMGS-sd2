@@ -1,0 +1,18 @@
+include components/header
+block content
+h1(style="text-align: center;") Student Performance Page
+table(border="1px")
+  tbody
+        tr
+          th Student Name
+          th Course
+          th Grade
+          th Remarks/Status
+        for  row in results
+          tr  
+            td= row.student_name
+            td
+              a(href="course-detail/"+row.id) #{row.course_name}
+            td= row.grade
+            td= row.remarks
+include components/footer

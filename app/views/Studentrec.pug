@@ -1,0 +1,19 @@
+include components/header
+block content
+    h1(style="text-align: center;") Student Record Page
+table(border="2px" style="border-spacing: 15px;")
+  tr  
+    th Student ID
+    th Name
+    th Course
+    th Course Level
+    th Academic Year
+  //- Iterate through database results and populate table rows
+  for  row in results
+    tr  
+      td= row.student_id
+      td= row.student_name
+      td= row.course_names
+      td(style="text-align: center;")=row.Courselevel
+      td= row.Academic_year
+include components/footer

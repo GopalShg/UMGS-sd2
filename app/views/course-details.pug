@@ -1,0 +1,21 @@
+include components/header
+block content
+  for row in categoryData
+    h1 Course: #{row.course_name}
+    p #{row.course_description}
+    table(border="1px")
+      tbody
+        tr
+          th Student ID
+          th Student Name
+          th Course Level
+          th Academic Year
+        for  row in results
+          tr  
+            td= row.student_id
+            td= row.student_name
+            td= row.Courselevel
+            td= row.Academic_year
+          
+            
+include components/footer

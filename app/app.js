@@ -14,94 +14,59 @@ app.set('views', './app/views');
 
 // Get the functions in the db.js file to use
 const db = require('./services/db');
-const { User } = require("./user");
 
-// Create a route for root - /
+// Create a route for login page - /
 app.get("/", function(req, res) {
     res.render("index");
 });
 
-// Create a route for testing the db
-app.get("/db_test", function(req, res) {
-    // Assumes a table called test_table exists in your database
-    sql = 'select * from Course';
+// Create a route for Student Record - /
+app.get('/Record', function(req, res) {
+    var sql = 'SELECT s.id AS student_id, s.name AS student_name, s.email, s.Courselevel, s.Academic_year, GROUP_CONCAT(c.name) AS course_names FROM student s JOIN enrollments e ON s.id = e.student_id JOIN course c ON e.course_id = c.id GROUP BY s.id, s.name, s.email, s.Courselevel, s.Academic_year';
     db.query(sql).then(results => {
-        console.log(results);
-        res.send(results)
+         res.render('Studentrec', {results: results});
     });
 });
 
-// Create a route for /goodbye
-// Responds to a 'GET' request
-app.get("/goodbye", function(req, res) {
-    res.send("Goodbye world!");
+// Create a route for Performance page - /
+app.get('/Performance', function(req, res) {
+    var sql = 'SELECT s.name as `student_name`, c.id, c.name as `course_name`, r.grade, r.remarks FROM student as s, course as c, result as r WHERE r.student_id = s.id AND r.course_id = c.id;';
+    
+    db.query(sql).then(results => {
+        res.render('Studentper', {results: results});
+   });
 });
 
-// Register
-app.get('/register', function (req, res) {
-    res.render('register');
+// All Courses page /
+app.get('/all-courses', function(req, res) {
+    var sql = 'SELECT * from course';
+    
+    db.query(sql).then(results => {
+        res.render('all-courses', {courses: results});
+   });
 });
+// Create a route for Performance page - /
+app.get('/course-detail/:id', function(req, res) {
+    var c_id = req.params.id;
+    var sql = 'SELECT s.id AS student_id, s.name AS student_name, s.Courselevel, s.Academic_year FROM student s JOIN enrollments e ON s.id = e.student_id WHERE e.course_id = ?';
+    
+    var sql2 = "SELECT name as course_name, description as course_description from course where id = ? "
 
-app.post('/set-password', async function (req, res) {
-    params = req.body;
-    var user = new User(params.email);
-    try {
-        uId = await user.getIdFromEmail();
-        if (uId) {
-            // If a valid, existing user is found, set the password and redirect to the users single-student page
-            await user.setUserPassword(params.password);
-            console.log(req.session.id);
-            res.send('Password set successfully');
-        }
-        else {
-            // If no existing user is found, add a new one
-            newId = await user.addUser(params.email);
-            res.send('Perhaps a page where a new user sets a programme would be good here');
-        }
-    } catch (err) {
-        console.error(`Error while adding password `, err.message);
-    }
+    db.query(sql,[c_id]).then(results => {
+        console.log(results);
 
-// Login
-app.get('/login', function (req, res) {
-    res.render('login');
+        db.query(sql2,[c_id]).then(categoryData => {
+            console.log(categoryData);
+    
+          //   res.render('course-details', {results: results, category_name: categoryData.category_name, category_description: categoryData.category_description });
+      res.render('course-details', {results: results, categoryData: categoryData });
+    });
+    });
 });
-// Check submitted email and password pair
-app.post('/authenticate', async function (req, res) {
-    params = req.body;
-    var user = new User(params.email);
-    try {
-        uId = await user.getIdFromEmail();
-        if (uId) {
-            match = await user.authenticate(params.password);
-            if (match) {
-                res.redirect('/single-student/' + uId);
-            }
-            else {
-                // TODO improve the user journey here
-                res.send('invalid password');
-            }
-        }
-        else {
-            res.send('invalid email');
-        }
-    } catch (err) {
-        console.error(`Error while comparing `, err.message);
-    }
-});
-
-// Create a dynamic route for /hello/<name>, where name is any value provided by user
-// At the end of the URL
-// Responds to a 'GET' request
-app.get("/hello/:name", function(req, res) {
-    // req.params contains any parameters in the request
-    // We can examine it in the console for debugging purposes
-    console.log(req.params);
-    //  Retrieve the 'name' parameter and use it in a dynamically generated page
-    res.send("Hello " + req.params.name);
-});
-
-// Start server on port 3000
+// Create a route for About page - /
+app.get('/about', function(req, res) {
+        res.render('about');
+   });
 app.listen(3000,function(){
     console.log(`Server running at http://127.0.0.1:3000/`);
 });

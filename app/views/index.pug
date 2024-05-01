@@ -1,17 +1,14 @@
-doctype html
-html
-  head
-    title University Login
-  body
-    h1 University Login
-    form(action='/login', method='post')
-      div
-        label(for='email') Email:
-        input(type='email', id='email', name='email', required)
-      div
-        label(for='password') Password:
-        input(type='password', id='password', name='password', required)
-      div
-        button(type='submit') Login
-    if message
-      p.error= message
+include components/header
+block content
+    div.home-section
+      img(src="/img/home-bg.jpg").home-img
+
+      h2 University Management System
+      p Welcome to the University Management System, your comprehensive solution for managing all aspects of your university operations. This powerful platform is designed to streamline administrative tasks, enhance student experience, and provide valuable insights to university leadership.
+
+      h2 Student Information Management
+      p Efficiently manage student records, from enrollment to graduation. Securely store and access student details, including personal information, academic performance, and course enrollment. Automate processes like admissions, registration, and transcript generation to save time and reduce errors.
+
+include components/footer
+          
+            
