@@ -8,6 +8,7 @@ table(border="2px" style="border-spacing: 15px;")
     th Course
     th Course Level
     th Academic Year
+    th Action
   //- Iterate through database results and populate table rows
   for  row in results
     tr  
@@ -16,4 +17,6 @@ table(border="2px" style="border-spacing: 15px;")
       td= row.course_names
       td(style="text-align: center;")=row.Courselevel
       td= row.Academic_year
+      td
+        a(href="add-grade/"+row.student_id) Add Grade
 include components/footer

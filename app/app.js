@@ -6,6 +6,9 @@ var app = express();
 
 // Add static files location
 app.use(express.static("static"));
+const bodyParser = require("body-parser");
+// Parse request body
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Use the Pug templating engine
 app.set('view engine', 'pug');
@@ -45,7 +48,7 @@ app.get('/all-courses', function(req, res) {
         res.render('all-courses', {courses: results});
    });
 });
-// Create a route for Performance page - /
+// Create a route for course detail page - /
 app.get('/course-detail/:id', function(req, res) {
     var c_id = req.params.id;
     var sql = 'SELECT s.id AS student_id, s.name AS student_name, s.Courselevel, s.Academic_year FROM student s JOIN enrollments e ON s.id = e.student_id WHERE e.course_id = ?';
@@ -62,6 +65,41 @@ app.get('/course-detail/:id', function(req, res) {
       res.render('course-details', {results: results, categoryData: categoryData });
     });
     });
+});
+
+
+// Create a route for course detail page - /
+app.get('/add-grade/:id', function(req, res) {
+    var s_id = req.params.id;
+    var sql = 'SELECT * from Student where id = ?';
+    var sql2 = 'SELECT c.id, c.name FROM course c INNER JOIN enrollments e ON c.id = e.course_id WHERE e.student_id = ?';
+    db.query(sql,[s_id]).then(results => {
+        console.log(results);
+        db.query(sql2,[s_id]).then(courses => {
+            console.log(courses);
+    
+      res.render('add-grade', {results: results, courses:courses});
+    });
+    });
+})
+
+app.post('/add-grade-form', (req, res) => {
+    
+      const { student_id, c_id, grade, remarks } = req.body;
+  
+      // Insert the data into the Result table
+      const query = 'INSERT INTO Result (student_id, course_id, grade, remarks) VALUES (?, ?, ?, ?)';
+      const values = [student_id, c_id, grade, remarks];
+
+      console.log(values);
+
+      db.query(query, values, (err,result) => {
+        if(err){throw err;}
+        else{
+            console.log("done")
+            res.redirect("Performance");
+        }
+  });
 });
 // Create a route for About page - /
 app.get('/about', function(req, res) {
