@@ -14,6 +14,7 @@ app.set('views', './app/views');
 
 // Get the functions in the db.js file to use
 const db = require('./services/db');
+const { User } = require("./user");
 
 // Create a route for root - /
 app.get("/", function(req, res) {
@@ -34,6 +35,59 @@ app.get("/db_test", function(req, res) {
 // Responds to a 'GET' request
 app.get("/goodbye", function(req, res) {
     res.send("Goodbye world!");
+});
+
+// Register
+app.get('/register', function (req, res) {
+    res.render('register');
+});
+
+app.post('/set-password', async function (req, res) {
+    params = req.body;
+    var user = new User(params.email);
+    try {
+        uId = await user.getIdFromEmail();
+        if (uId) {
+            // If a valid, existing user is found, set the password and redirect to the users single-student page
+            await user.setUserPassword(params.password);
+            console.log(req.session.id);
+            res.send('Password set successfully');
+        }
+        else {
+            // If no existing user is found, add a new one
+            newId = await user.addUser(params.email);
+            res.send('Perhaps a page where a new user sets a programme would be good here');
+        }
+    } catch (err) {
+        console.error(`Error while adding password `, err.message);
+    }
+
+// Login
+app.get('/login', function (req, res) {
+    res.render('login');
+});
+// Check submitted email and password pair
+app.post('/authenticate', async function (req, res) {
+    params = req.body;
+    var user = new User(params.email);
+    try {
+        uId = await user.getIdFromEmail();
+        if (uId) {
+            match = await user.authenticate(params.password);
+            if (match) {
+                res.redirect('/single-student/' + uId);
+            }
+            else {
+                // TODO improve the user journey here
+                res.send('invalid password');
+            }
+        }
+        else {
+            res.send('invalid email');
+        }
+    } catch (err) {
+        console.error(`Error while comparing `, err.message);
+    }
 });
 
 // Create a dynamic route for /hello/<name>, where name is any value provided by user
