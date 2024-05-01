@@ -70,3 +70,30 @@ table{
     margin-left: auto;
     margin-right: auto;
 }
+
+.about-section{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 800px;
+}
+.about-img{
+    width: 400px;
+}
+.about-1, .about-2{
+    padding: 10px;
+}
+.about-section2{
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    width: 800px;
+}
+.about-section2 img{
+    width: 800px;
+}
+.about-section2 .row2 img{
+    width: 500px;
+}
