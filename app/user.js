@@ -41,7 +41,6 @@ async getIdFromEmail() {
             return true;
         }
     
-
     }
     
     // Add a new record to the users table    
@@ -56,18 +55,23 @@ async getIdFromEmail() {
         this.id = result.insertId;
         return this.id;
     }
-
     
     }
 
     // Test a submitted password against a stored password
-    async authenticate(submitted) {
-
+    async authenticate(submitted) {        
+        // Get the stored, hashed password for the user
+        var sql = "SELECT password FROM Users WHERE id = ?";
+        const result = await db.query(sql, [this.id]);
+        const match = await bcrypt.compare(submitted, result[0].password);
+        if (match == true) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
-
-}
-
-module.exports  = {
+   module.exports  = {
     User
 }
